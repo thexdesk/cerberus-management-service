@@ -63,6 +63,7 @@ import com.nike.cerberus.endpoints.secret.ReadSecureData;
 import com.nike.cerberus.endpoints.file.ReadSecureFile;
 import com.nike.cerberus.endpoints.secret.WriteSecureData;
 import com.nike.cerberus.endpoints.file.WriteSecureFile;
+import com.nike.cerberus.endpoints.test.TestEndpoint;
 import com.nike.cerberus.endpoints.version.GetSecretVersionPathsForSdb;
 import com.nike.cerberus.endpoints.version.GetSecureDataVersions;
 import com.nike.cerberus.error.DefaultApiErrorsImpl;
@@ -212,7 +213,8 @@ public class CmsGuiceModule extends AbstractModule {
             ReadSecureFile readSecureFile,
             HeadSecureFile headSecureFile,
             GetSecureFiles getSecureFiles,
-            DeleteSecureFile deleteSecureFile
+            DeleteSecureFile deleteSecureFile,
+            TestEndpoint testEndpoint
     ) {
         return new LinkedHashSet<>(Arrays.<Endpoint<?>>asList(
                 healthCheckEndpoint,
@@ -229,7 +231,7 @@ public class CmsGuiceModule extends AbstractModule {
                 getDashboard, getDashboardRedirect,
                 writeSecureFile, readSecureFile, deleteSecureFile, headSecureFile, getSecureFiles,
                 restoreSafeDepositBox,
-                getSecretVersionPathsForSdb, getSecureDataVersions
+                getSecretVersionPathsForSdb, getSecureDataVersions, testEndpoint
         ));
     }
 
