@@ -48,4 +48,5 @@ dependencies {
     integrationTestCompile sourceSets.test.output
     integrationTestRuntime configurations.testRuntime
     integrationTestCompile 'com.fieldju:commons:1.1.0'
+    testCompile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.9.0'
 }

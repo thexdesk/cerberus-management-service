@@ -28,6 +28,7 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.kms.model.PutKeyPolicyRequest;
 import com.amazonaws.services.kms.model.ScheduleKeyDeletionRequest;
 import com.amazonaws.services.kms.model.Tag;
+import com.google.inject.Exposed;
 import com.google.inject.name.Named;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.nike.backstopper.exception.ApiException;
@@ -155,7 +156,7 @@ public class KmsService {
         return awsIamRoleKmsKeyRecord;
     }
 
-    private String createKmsKeyInAws(String iamPrincipalArn, String kmsKeyRecordId, String awsRegion) {
+    public String createKmsKeyInAws(String iamPrincipalArn, String kmsKeyRecordId, String awsRegion) {
         final AWSKMSClient kmsClient = kmsClientFactory.getClient(awsRegion);
 
         final String policy = kmsPolicyService.generateStandardKmsPolicy(iamPrincipalArn);

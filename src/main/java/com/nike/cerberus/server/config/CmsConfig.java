@@ -16,10 +16,6 @@
 
 package com.nike.cerberus.server.config;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.rolling.AuditLogsS3TimeBasedRollingPolicy;
-import ch.qos.logback.core.rolling.FiveMinuteRollingFileAppender;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Modules;
 import com.nike.backstopper.handler.riposte.config.guice.BackstopperRiposteConfigGuiceModule;
 import com.nike.cerberus.server.config.guice.CerberusBackstopperRiposteGuiceModule;
@@ -30,7 +26,6 @@ import com.nike.cerberus.server.config.guice.GuiceProvidedServerConfigValues;
 import com.nike.cerberus.server.config.guice.MetricsGuiceModule;
 import com.nike.cerberus.server.config.guice.OneLoginGuiceModule;
 import com.nike.cerberus.util.ArchaiusUtils;
-import com.nike.cerberus.service.ConfigService;
 import com.nike.cerberus.util.JobsInitializerUtils;
 import com.nike.guice.PropertiesRegistrationGuiceModule;
 import com.nike.guice.typesafeconfig.TypesafeConfigPropertiesRegistrationGuiceModule;
@@ -54,13 +49,13 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.typesafe.config.Config;
-import org.slf4j.LoggerFactory;
 import io.netty.handler.ssl.SslContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -89,8 +84,11 @@ public class CmsConfig implements ServerConfig {
 
     protected final ObjectMapper objectMapper;
 
-    protected CmsConfig(Config appConfig, PropertiesRegistrationGuiceModule propertiesRegistrationGuiceModule) {
-        super();
+    protected Injector appInjector;
+
+    protected CmsConfig(Config appConfig,
+                        PropertiesRegistrationGuiceModule propertiesRegistrationGuiceModule,
+                        Optional<Collection<Module>> optionalOverrideModules) {
 
         // Store the appConfig.
         if (appConfig == null)
@@ -114,7 +112,11 @@ public class CmsConfig implements ServerConfig {
                 new CmsGuiceModule(objectMapper)
         ));
 
-        Injector appInjector = Guice.createInjector(appGuiceModules);
+        if (optionalOverrideModules.isPresent()) {
+            appInjector = Guice.createInjector(Modules.override(appGuiceModules).with(optionalOverrideModules.get()));
+        } else {
+            appInjector = Guice.createInjector(appGuiceModules);
+        }
 
         // Use the new Guice Injector to create a GuiceProvidedServerConfigValues, which will contain all the guice-provided config stuff for this app.
         this.guiceValues = appInjector.getProvider(GuiceProvidedServerConfigValues.class).get();
@@ -127,7 +129,7 @@ public class CmsConfig implements ServerConfig {
     }
 
     public CmsConfig(Config appConfig) {
-        this(appConfig, new TypesafeConfigPropertiesRegistrationGuiceModule(appConfig));
+        this(appConfig, new TypesafeConfigPropertiesRegistrationGuiceModule(appConfig), Optional.empty());
     }
 
     public static ObjectMapper configureObjectMapper() {
